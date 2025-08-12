@@ -10,3 +10,10 @@ j'ai agrémenté mon exercice de commentairesn j'ai fait des recherches sur inte
 creer mon CSS pour pouvoir me concentrer sur l'essentiel de l'exercice.
 
 je l'ai Gité, mais j'ai recommencé cinq fois la manoeuvre sans regarder mes notes pour apprendre à le faire sans mes exemples.
+
+le deuxieme exercice consistait aujourd'hui à connecter un frmulaire d'inscription à Mysql et creer une base de données et une table de messages
+pour que lorsque quelqu'un s'inscrive dans le formulaire, il puisse envoyer un message qui sera stocké dans ma base de données. Cet exercice etait assez dur et long, 
+
+j'ai utlisé chatgpt pour les parties de style, lui ai demandé comment l'integrer a une page html, et lui ai demandé de m'expliquer certains process pour que je puisse bien 
+comprendre chaque fonction, chaque varialbe, et chaque super globales. C'est le deuxième jour de révisions et j'ai déja assimilé ert compris bcp plus de choses qu'en classe
+lors des decouvertes. Encore 13 jours/ 13 exercices
