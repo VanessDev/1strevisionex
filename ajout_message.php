@@ -1,19 +1,17 @@
 <?php
-// J'inclus mon fichier de config qui contient la fonction dbConnexion() (retourne un objet PDO).
-// __DIR__ garantit un chemin absolu fiable, peu importe d'où le script est lancé.
 require_once __DIR__ . '/config/database.php';
+// Je vérifie que la page a été appelée via un envoi de formulaire en méthode POST.
+// $_SERVER est une superglobale ; REQUEST_METHOD me dit si c’est "POST" ou "GET".
 
-// J'initialise mes variables d'état pour l'affichage des messages.
+
+//Initialisation des variables pour éviter les "Undefined variable"
 $success = '';
 $errors = [];
-
-// J'initialise aussi les champs du formulaire, pour éviter les notices au premier affichage (GET).
 $nom = '';
 $email = '';
 $message = '';
 
-// Je vérifie que la page a été appelée via un envoi de formulaire en méthode POST.
-// $_SERVER est une superglobale ; REQUEST_METHOD me dit si c’est "POST" ou "GET".
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Je récupère les champs depuis la superglobale $_POST.
@@ -39,16 +37,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = "Le message est obligatoire.";
     }
 
-    // Si AUCUNE erreur (tableau vide), je peux insérer en base.
-    // "!$errors" veut dire : "le tableau $errors est vide".
-    if (!$errors) {
-        try {
-            // J'ouvre une connexion à la base via ma fonction utilitaire (définie dans database.php).
-            // Elle me renvoie un objet PDO prêt à l'emploi.
-            $pdo = dbConnexion();
+    try {
+        // J'ouvre une connexion à la base via ma fonction utilitaire (définie dans database.php).
+        // Elle me renvoie un objet PDO prêt à l'emploi.
+        $pdo = dbConnexion();
 
+        //Je vérifie que l'e-mail n'existe pas déjà 
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM messages WHERE email = ?");
+        $stmt->execute([$email]);
+
+        // fetchColumn() renvoie la première colonne du premier enregistrement.
+        // Ici, ce sera le nombre d'occurrences de cet email.
+        if ((int) $stmt->fetchColumn() > 0) {
+            // Si le nombre est > 0, l'email existe déjà → j'ajoute une erreur au tableau.
+            $errors[] = "Cet email existe déjà. Utilise un autre email.";
+        }
+
+        // Si le tableau $errors est toujours vide (!$errors = aucune erreur),
+        // je peux faire l'insertion en base.
+        if (!$errors) {
             // J'écris ma requête d'insertion avec des placeholders (?) pour préparer la requête.
-            $sql = "INSERT INTO messages (nom,email,message) VALUES (?,?,?)";
+            $sql = "INSERT INTO messages (nom, email, message) VALUES (?, ?, ?)";
 
             // Je prépare la requête (PDO renvoie un statement).
             $stmt = $pdo->prepare($sql);
@@ -61,12 +70,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Je vide les champs pour nettoyer le formulaire après insertion.
             $nom = $email = $message = '';
-        } catch (PDOException $e) {
-            // Si une erreur SQL arrive, je la récupère et je l'ajoute dans mes erreurs.
-            $errors[] = "ERREUR SQL : " . $e->getMessage();
         }
+
+    } catch (PDOException $e) {
+        // Si une erreur SQL arrive, je la récupère et je l'ajoute dans mes erreurs.
+        $errors[] = "ERREUR SQL : " . $e->getMessage();
     }
-}
+} // ←←← IMPORTANT : on referme bien le if (POST) avant de fermer le PHP
+
 ?>
 <!-- Superglobales : $_SERVER, $_POST (toujours dispos partout). -->
 <!-- Variables : $success, $errors, $nom, $email, $message, $pdo, $sql, $stmt. -->
@@ -185,17 +196,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <form method="post" action="">
             <!-- Champ NOM -->
             <label for="nom">Nom</label>
-            <input type="text" id="nom" name="nom" value="<?php echo htmlspecialchars($nom); ?>" <!-- Je réaffiche ce
-                que l'utilisateur a saisi -->
-            required
-            />
+            <!-- Je réaffiche ce que l'utilisateur a saisi -->
+            <input type="text" id="nom" name="nom" value="<?php echo htmlspecialchars($nom); ?>" required />
 
             <!-- Champ EMAIL -->
             <label for="email">Email</label>
-            <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($email); ?>" <!-- Idem, je
-                garde la saisie -->
-            required
-            />
+            <!-- Idem, je garde la saisie -->
+            <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($email); ?>" required />
+
 
             <!-- Champ MESSAGE -->
             <label for="message">Message</label>

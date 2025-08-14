@@ -81,13 +81,17 @@ $rows = $pdo->query("SELECT id, nom, email, message, date_envoi FROM messages OR
                 <th style="width:220px;">Email</th>
                 <th>Message</th>
                 <th style="width:200px;">Date</th>
+                <!-- Ajout d'une colonne Actions exo 5 -->
+                <!-- La colonne "Actions" sert à mettre les boutons ou liens qui permettent d’agir sur la ligne affichée dans le tableau. -->
+                <th style="width:120px;">Actions</th>
             </tr>
         </thead>
+
         <tbody>
             <?php if (!$rows): ?>
                 <!-- Si aucun message dans la base, j'affiche une ligne vide avec un message -->
                 <tr>
-                    <td colspan="5" class="empty">Aucun message pour le moment.</td>
+                    <td colspan="6" class="empty">Aucun message pour le moment.</td>
                 </tr>
             <?php else: ?>
                 <!-- Je boucle sur chaque ligne de résultat -->
@@ -114,14 +118,30 @@ $rows = $pdo->query("SELECT id, nom, email, message, date_envoi FROM messages OR
                             echo $ts ? date('d/m/Y H:i', $ts) : htmlspecialchars($r['date_envoi']);
                             ?>
                         </td>
+
+                        <!-- Colonne Actions : liens/boutons Modifier et Supprimer -->
+                        <td>
+                            <!-- Lien Modifier -->
+                            <a href="edit_message.php?id=<?php echo (int) $r['id']; ?>">Modifier</a>
+
+                            <!-- Formulaire Supprimer -->
+                            <form action="delete_message.php" method="post" style="display:inline;"
+                                onsubmit="return confirm('Supprimer ce message ? Cette action est définitive.');">
+                                <input type="hidden" name="id" value="<?php echo (int) $r['id']; ?>">
+                                <button type="submit" style="background:none;border:none;color:#c00;cursor:pointer;">
+                                    Supprimer
+                                </button>
+                            </form>
+                        </td>
                     </tr>
                 <?php endforeach; ?>
             <?php endif; ?>
         </tbody>
+
     </table>
 
     <!-- Un lien pour revenir à la page d'ajout de message -->
-    <p style="margin-top:1rem;"><a href="ajouter_message.php">Ajouter un message</a></p>
+    <p style="margin-top:1rem;"><a href="ajout_message.php">Ajouter un message</a></p>
 </body>
 
 </html>
